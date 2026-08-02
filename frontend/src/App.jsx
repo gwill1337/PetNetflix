@@ -7,11 +7,13 @@ import { MovieCard } from './MovieCard';
 import { FavoriteButton } from './FavoriteButton';
 import "./App.css";
 import axios from 'axios';
+import { useDebounce } from './hooks/useDebounce';
 
 const API_URL = "http://localhost:8000";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearch = useDebounce(searchTerm, 400)
   
   const [movies, setMovies] = useState([]);
   const [favoriteIds, setFavoritesIds] = useState(new Set());
@@ -29,9 +31,6 @@ function App() {
           axios.get(`${API_URL}/favorites?user_id=${userId}`, {signal: controller.signal})
         ]);
 
-        // const moviesData = await moviesRes.json();
-        // const favoritesData = await favoritesRes.json();
-
         setMovies(moviesRes.data)
         setFavoritesIds(new Set(favoritesRes.data));
       } catch (err) {
@@ -44,46 +43,30 @@ function App() {
     }
 
     fetchData();
-    
-    // async function fetchMovies() {
-    //   try {
-    //     const res = await fetch(`${API_URL}/movies`, {
-    //       signal: controller.signal,
-          
-    //     });
-
-    //     const data = await res.json();
-    //     setMovies(data); 
-
-    //   } catch (err) {
-    //     if (err.name !== 'AbortError') {
-    //       setError(err.message);
-    //     }
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // }
-
-    // fetchMovies();
 
     return () => controller.abort();
   }, [userId]);
   
   return (
     <div className='min-h-screen w-full bg-black text-white px-6 py-5'>
-      <header className='mb-10 flex items-center'>
+      <header className='mb-10 flex items-center justify-between'>
         <img 
         src="/Logonetflix.png"
         alt="Netflix"
         className='h-8 w-auto'
         />
 
-        <input type="search" />
+        <input type="search" value={searchTerm} onChange={e => {
+          setSearchTerm(e.target.value)
+        }}
+        placeholder="Search..."
+        className='border border-white/15 px-2 py-1 rounded outline-0'
+        />
       </header>
       <main className=' flex gap-6'>
         {loading && <p>Loading...</p>}
         {error && <p className='text-red-500'>Error: {error}</p>}
-        {!loading && !error && movies.map((movie) => (
+        {!loading && !error && movies.filter(movie => movie.name.toLowerCase().includes(debouncedSearch.toLowerCase())).map((movie) => (
           <MovieCard
           key={movie.movie_id}
           movieId={movie.movie_id}

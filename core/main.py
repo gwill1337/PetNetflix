@@ -85,6 +85,18 @@ async def get_movies(
     res = pre_res.scalars().all()
     return res
 
+@app.get("/search/movie")
+async def search_for_movie(
+    movie_name: str,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    query = select(Movies).where(Movies.name.ilike(f"%{movie_name.strip()}%")).offset(offset).limit(limit)
+
+    res = await db.execute(query)
+    return res.scalars().all()
+
 @app.post("/movie")
 async def add_movie(body: NewMovie, db: AsyncSession = Depends(get_db)):
     stmt = Movies(name=body.name, image=body.image, rating=body.rating, year=body.year)

@@ -31,44 +31,6 @@ export function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
         }
     }
         
-    //     try {
-    //         if (!isFavorite) {
-    //             const res = await fetch(`${API_URL}/favorite`, {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type' : 'application/json',
-    //                 },
-    //                 body: JSON.stringify({
-    //                     user_id: userId,
-    //                     movie_id: movieId,
-    //                     }),
-    //                 });
-    //                 if (!res.ok) {
-    //                     throw new Error('Server Error');
-    //                 }
-    //         } else {
-    //             const res = await fetch(`${API_URL}/favorite`, {
-    //             method: 'DELETE',
-    //             headers: {
-    //                 'Content-Type' : 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 user_id: userId,
-    //                 movie_id: movieId,
-    //                 }),
-    //             });
-    //             if (!res.ok) {
-    //                 throw new Error('Server Error');
-    //             }
-    //         }
-    //     } catch (err) {
-    //         setIsFavorite(!nextValue);
-    //         console.error(err.message);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }
-
     return <button onClick={handleClick} disabled={loading}>
         {isFavorite ? '💖' : '🖤'}
     </button>
