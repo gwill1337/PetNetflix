@@ -1,4 +1,3 @@
-import pydantic_settings
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):

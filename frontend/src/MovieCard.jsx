@@ -1,12 +1,16 @@
-import { FavoriteButton } from "./FavoriteButton";
+import { Link } from "react-router-dom";
+import  FavoriteButton  from "./FavoriteButton";
+import { memo } from "react";
 
-export function MovieCard({image, movieId, userId, rating, isFavorite }) {
+function MovieCard({image, movieId, userId, rating, isFavorite }) {
     return (
         <div className="relative w-50 rounded-2xl overflow-hidden shadow-lg">
+            <Link to={`movie/${movieId}`}>
             <img src={image}
             alt="Movie Poster"
             className="w-full h-auto object-cover"
             />
+            </Link>
             <div className="absolute bottom-0 left-0 w-full bg-linear-to-t from-black/80 to-transparent p-2 text-sm text-white font-semibold">
                 IMDb: {rating}
             </div>
@@ -16,3 +20,5 @@ export function MovieCard({image, movieId, userId, rating, isFavorite }) {
         </div>
     )
 }
+
+export default memo(MovieCard)

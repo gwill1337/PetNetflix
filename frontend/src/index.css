@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+.btn {
+    border-radius: 4px;
+    border: none;
+    padding: 0.3em 0.6em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: black;
+    color: white;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+.btn:hover {
+    background-color: #ffffff55;
+}

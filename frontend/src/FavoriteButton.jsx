@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import axios from 'axios';
 
-export function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
+function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
     const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
     const [loading, setLoading] = useState(false);
     const API_URL = "http://localhost:8000";
@@ -35,3 +35,5 @@ export function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
         {isFavorite ? '💖' : '🖤'}
     </button>
 }
+
+export default memo(FavoriteButton)

@@ -1,39 +1,34 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import ForeignKey, select, delete
-from pydantic import BaseModel
 from config import settings
+
+from schemes import (
+    NewMovie,
+    EditMovie,
+    NewMovieOut,
+    AddFavorite,
+    AddFavoriteOut,
+    CreateUser,
+    CreateUserOut,
+)
 
 engine = create_async_engine(settings.database_url)
 SessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
-
-class NewMovie(BaseModel):
-    name: str
-    image: str
-    rating: float
-    year: str
-
-class AddFavorite(BaseModel):
-    movie_id: int
-    user_id: int
-
-class CreateUser(BaseModel):
-    username: str
-
 class Base(DeclarativeBase):
     pass
-
 
 class Movies(Base):
     __tablename__ = "movies"
 
     movie_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
+    title: Mapped[str] = mapped_column(nullable=True)
     image: Mapped[str]
     rating: Mapped[float]
     year: Mapped[str]
@@ -62,6 +57,7 @@ async def get_db():
     async with SessionLocal() as db:
         yield db
 
+# app = FastAPI(lifespan=lifespan)
 app = FastAPI()
 
 app.add_middleware(
@@ -85,6 +81,13 @@ async def get_movies(
     res = pre_res.scalars().all()
     return res
 
+@app.get("/movie/{movie_id}")
+async def get_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
+    movie = await db.get(Movies, movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found.")
+    return movie
+
 @app.get("/search/movie")
 async def search_for_movie(
     movie_name: str,
@@ -99,7 +102,7 @@ async def search_for_movie(
 
 @app.post("/movie")
 async def add_movie(body: NewMovie, db: AsyncSession = Depends(get_db)):
-    stmt = Movies(name=body.name, image=body.image, rating=body.rating, year=body.year)
+    stmt = Movies(name=body.name, image=body.image, rating=body.rating, year=body.year, title=body.title)
     db.add(stmt)
     try:
         await db.commit()
@@ -107,6 +110,28 @@ async def add_movie(body: NewMovie, db: AsyncSession = Depends(get_db)):
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Server Error: {e}")
     return {"Message": "Movie added to database"}
+
+@app.put("/movie/{movie_id}")
+async def edit_movie(movie_id: int, body: EditMovie, db: AsyncSession = Depends(get_db)):
+    movie = await db.get(Movies, movie_id)
+
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found.")
+
+    movie.name = body.name
+    movie.title = body.title
+    movie.image = body.image
+    movie.rating = body.rating
+    movie.year = body.year
+
+    try:
+        await db.commit()
+        await db.refresh(movie)
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {e}")
+
+    return {"Message": "Movie updated successfully"}
 
 @app.post("/favorite")
 async def add_to_favorite(body: AddFavorite, db: AsyncSession = Depends(get_db)):
