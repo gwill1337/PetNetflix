@@ -3,8 +3,8 @@ import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 
 import { useState, useEffect } from 'react';
-import  MovieCard  from './MovieCard';
-import  FavoriteButton from './FavoriteButton';
+import MovieCard from './MovieCard';
+import FavoriteButton from './FavoriteButton';
 import "./index.css";
 import axios from 'axios';
 import { useDebounce } from './hooks/useDebounce';
@@ -15,11 +15,11 @@ const API_URL = "http://localhost:8000";
 
 function App() {
 
-  const {theme, toggleTheme} = useTheme();
-  
+  const { theme, toggleTheme } = useTheme();
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 400);
-  
+
   const [movies, setMovies] = useState([]);
   const [favoriteIds, setFavoritesIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
@@ -32,8 +32,8 @@ function App() {
     async function fetchData() {
       try {
         const [moviesRes, favoritesRes] = await Promise.all([
-          axios.get(`${API_URL}/movies`, { signal: controller.signal}),
-          axios.get(`${API_URL}/favorites?user_id=${userId}`, {signal: controller.signal})
+          axios.get(`${API_URL}/movies`, { signal: controller.signal }),
+          axios.get(`${API_URL}/favorites?user_id=${userId}`, { signal: controller.signal })
         ]);
 
         setMovies(moviesRes.data)
@@ -54,7 +54,7 @@ function App() {
 
   // useEffect(() => {
   //   const controller = new AbortController();
-    
+
   //   async function fetchMovies() {
   //     setLoading(true);
   //     try {
@@ -80,7 +80,7 @@ function App() {
   //   fetchMovies();
   //   return () => controller.abort();
   // }, [debouncedSearch]);
-  
+
   return (
     <div className='min-h-screen w-full bg-white dark:bg-black text-black dark:text-white px-6 py-5'>
       {/* <header className='mb-10 flex items-center justify-between'>
@@ -110,12 +110,12 @@ function App() {
         {error && <p className='text-red-500'>Error: {error}</p>}
         {!loading && !error && movies.map((movie) => (
           <MovieCard
-          key={movie.movie_id}
-          movieId={movie.movie_id}
-          userId={userId}
-          image={movie.image}
-          rating={movie.rating}
-          isFavorite={favoriteIds.has(movie.movie_id)}
+            key={movie.movie_id}
+            movieId={movie.movie_id}
+            userId={userId}
+            image={movie.image}
+            rating={movie.rating}
+            isFavorite={favoriteIds.has(movie.movie_id)}
           />
         ))}
       </main>

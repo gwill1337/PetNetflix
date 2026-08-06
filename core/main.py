@@ -1,10 +1,12 @@
 from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, Depends, HTTPException, Query, status
+import bcrypt
+import jwt
+from datetime import datetime, timedelta, timezone
+from fastapi import FastAPI, Depends, HTTPException, Query, status, Cookie, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import ForeignKey, select, delete
+from sqlalchemy import ForeignKey, Text, exists, select, delete
 from config import settings
 
 from schemes import (
@@ -15,6 +17,8 @@ from schemes import (
     AddFavoriteOut,
     CreateUser,
     CreateUserOut,
+    LoginUser,
+    LoginUserOut
 )
 
 engine = create_async_engine(settings.database_url)
@@ -29,6 +33,7 @@ class Movies(Base):
     movie_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     title: Mapped[str] = mapped_column(nullable=True)
+    description: Mapped[str] = mapped_column(Text)
     image: Mapped[str]
     rating: Mapped[float]
     year: Mapped[str]
@@ -39,6 +44,7 @@ class Users(Base):
 
     user_id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True)
+    email: Mapped[str] = mapped_column(unique=True)
     password_hash: Mapped[str]
 
 class UsersFavorite(Base):
@@ -102,7 +108,7 @@ async def search_for_movie(
 
 @app.post("/movie")
 async def add_movie(body: NewMovie, db: AsyncSession = Depends(get_db)):
-    stmt = Movies(name=body.name, image=body.image, rating=body.rating, year=body.year, title=body.title)
+    stmt = Movies(name=body.name, image=body.image, rating=body.rating, year=body.year, title=body.title, description=body.description)
     db.add(stmt)
     try:
         await db.commit()
@@ -120,6 +126,7 @@ async def edit_movie(movie_id: int, body: EditMovie, db: AsyncSession = Depends(
 
     movie.name = body.name
     movie.title = body.title
+    movie.description = body.description
     movie.image = body.image
     movie.rating = body.rating
     movie.year = body.year
@@ -183,3 +190,82 @@ async def create_user(body: CreateUser, db: AsyncSession = Depends(get_db)):
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Server Error {e}")
     return {"Message": "User created"}
+
+
+def hash_password(password: str):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+def check_password(password: str, password_hash: str):
+    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+
+async def create_jwt(d: dict, exp_int: int):
+    d.copy()
+    expire_time = datetime.now(timezone.utc) + timedelta(seconds=exp_int)
+    d.update({"exp": expire_time})
+    res = jwt.encode(d,settings.jwt_key, algorithm=settings.jwt_algorithm)
+    return res
+
+async def check_jwt(token: str):
+    return jwt.decode(token, settings.jwt_key, algorithms=[settings.jwt_algorithm])
+
+@app.post("/auth/login")
+async def login(
+    body: LoginUser,
+    resp: Response,
+    db: AsyncSession = Depends(get_db),
+):
+
+    query = select(Users).where(Users.email == body.email)
+    pre_res = await db.execute(query)
+    user = pre_res.scalars().one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not exists.")
+
+    if not check_password(body.password, user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
+
+    payload = {"sub": str(user.user_id)}
+    token = await create_jwt(payload, 15*60)
+
+    resp.set_cookie("token", token, samesite="lax", httponly=True)
+    return {"Message": "Loged in successfully"}
+    
+@app.get("/me")
+async def get_current_user(token: str = Cookie(None)):
+    res = await check_jwt(token)
+    return res["sub"]
+
+@app.post("/auth/register")
+async def register(
+    body: CreateUser,
+    resp: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(exists().where(Users.email == body.email))
+    user_exists = await db.scalar(stmt)
+    if user_exists:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User Already exists.")
+    hashed_password = hash_password(body.password)
+    stmt = Users(username=body.username, email=body.email,password_hash=hashed_password)
+    db.add(stmt)
+    try:
+        await db.commit()
+        await db.refresh(stmt)
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"server error {e}")
+    login_data = LoginUser(
+        username=body.username,
+        email=body.email,
+        password=body.password,
+    )
+    await login(body=login_data,resp=resp , db=db)
+    return {"Message": "User created successfully"}
+
+@app.get("/users")
+async def get_users_test(db: AsyncSession = Depends(get_db)):
+    q = select(Users)
+    res = await db.execute(q)
+    return res.scalars().all()

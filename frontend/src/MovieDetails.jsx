@@ -49,31 +49,31 @@ export function MovieDetails() {
     if (!movie) return <p>Movie not found.</p>;
 
     return (
-        <div className="w-1/2 h-full bg-white dark:bg-black text-black dark:text-white px-6 py-5 flex">
+        <div className="w-full h-full bg-white dark:bg-black text-black dark:text-white px-6 py-5 flex items-start">
             {/* Movie details */}
-                {movie.image && (
-                    <div className="relative shrink-0 max-w-7/12 max-h-512">
-                        <img
-                            src={movie.image}
-                            alt={movie.title || movie.name}
-                            className="w-full h-full object-cover rounded-2xl shadow-lg"
+            {movie.image && (
+                <div className="relative shrink-0 w-md aspect-2/3">
+                    <img
+                        src={movie.image}
+                        alt={movie.title || movie.name}
+                        className="w-full h-full object-cover rounded-2xl shadow-lg"
+                    />
+                    <div className="absolute top-1 right-2 z-10">
+                        <FavoriteButton
+                            movieId={movie.movie_id}
+                            userId={userId}
+                            initialIsFavorite={isFavorite}
                         />
-                        <div className="absolute top-1 right-2 z-10">
-                            <FavoriteButton
-                                movieId={movie.movie_id}
-                                userId={userId}
-                                initialIsFavorite={isFavorite}
-                                />
-                        </div>
-                    </div>
-                )}
-                <div className="flex-1 flex flex-col justify-between py-2 p-6">
-                    <h1 className="w-96 text-xl font-bold">{movie.title || movie.name}</h1>
-                    <div>
-                        <p className="font-semibold text-amber-500">IMDb: {movie.rating}</p>
-                        <p className="text-black/60 dark:text-white/60 text-sm">{movie.year}</p>
                     </div>
                 </div>
+            )}
+            <div className=" flex flex-col justify-between max-w-4xl py-2 p-6">
+                <p className="w-auto  text-base font-normal">{movie.description || movie.title}</p>
+                <div>
+                    <p className="font-semibold text-amber-500">IMDb: {movie.rating}</p>
+                    <p className="text-black/60 dark:text-white/60 text-sm">{movie.year}</p>
+                </div>
+            </div>
         </div>
     );
 }

@@ -22,7 +22,7 @@ function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
             if (!isFavorite) {
                 await axios.post(`${API_URL}/favorite`, payload);
             } else
-                await axios.delete(`${API_URL}/favorite`, { data: payload});
+                await axios.delete(`${API_URL}/favorite`, { data: payload });
         } catch (err) {
             setIsFavorite(!nextValue);
             console.error(err.response?.data?.message || err.message);
@@ -30,7 +30,7 @@ function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
             setLoading(false);
         }
     }
-        
+
     return <button onClick={handleClick} disabled={loading}>
         {isFavorite ? '💖' : '🖤'}
     </button>

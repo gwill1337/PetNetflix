@@ -6,6 +6,7 @@ class NewMovie(BaseModel):
     image: str
     rating: float
     year: str
+    description: str
 
 class EditMovie(BaseModel):
     name: str
@@ -13,6 +14,7 @@ class EditMovie(BaseModel):
     image: str
     rating: float
     year: str
+    description: str
 
 class NewMovieOut(BaseModel):
     name: str
@@ -32,10 +34,23 @@ class AddFavoriteOut(BaseModel):
     user_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class LoginUser(BaseModel):
+    username: str
+    email: str
+    password: str
+
+class LoginUserOut(BaseModel):
+    username: str
+    email: str
+
 class CreateUser(BaseModel):
     username: str
+    email: str
+    password: str
 
 class CreateUserOut(BaseModel):
     username: str
+    email: str
 
     model_config = ConfigDict(from_attributes=True)
