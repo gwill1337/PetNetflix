@@ -62,7 +62,7 @@ function App() {
     <div className='min-h-screen w-full bg-white dark:bg-black text-black dark:text-white px-6 py-5'>
       <div className='relative'>
 
-        <main className=' flex gap-6 '>
+        <main className='flex gap-6'>
           {loading && <p>Loading...</p>}
           {error && <p className='text-red-500'>Error: {error}</p>}
           {!loading && !error && movies.map((movie) => (

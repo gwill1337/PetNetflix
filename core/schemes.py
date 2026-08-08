@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 class NewMovie(BaseModel):
@@ -59,5 +61,19 @@ class UserOut(BaseModel):
     username: str
     user_id: int
     email: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class NewComment(BaseModel):
+    movie_id: int
+    text: str
+
+class CommentOut(BaseModel):
+    id: int
+    user_id: int
+    user_username: str
+    movie_id: int
+    comment_text: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

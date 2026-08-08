@@ -8,7 +8,7 @@ from fastapi import FastAPI, Depends, HTTPException, Query, status, Cookie, Resp
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import ForeignKey, Text, exists, select, delete
+from sqlalchemy import DateTime, ForeignKey, Text, exists, select, delete, func
 from config import settings
 
 from schemes import (
@@ -18,6 +18,8 @@ from schemes import (
     CreateUser,
     LoginUser,
     UserOut,
+    NewComment,
+    CommentOut,
 )
 
 engine = create_async_engine(settings.database_url)
@@ -60,6 +62,17 @@ class UserSessions(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"))
     session_uuid: Mapped[str] = mapped_column(unique=True)
     refresh_token_hash: Mapped[str]
+
+class Comments(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    comment_text: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"))
+    user_username: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.movie_id", ondelete="CASCADE"))
+
     
 
 @asynccontextmanager
@@ -405,3 +418,48 @@ async def logout(
     resp.delete_cookie("token")
     resp.delete_cookie("refresh_token")
     return {"Message": "Logged out successfully"}
+
+
+@app.get("/comments/{movie_id}")
+async def get_comments(
+    movie_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    query = select(Comments).where(Comments.movie_id == movie_id)
+    try:
+        res = await db.execute(query)
+        comments = res.scalars().all()
+        return comments
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+
+@app.post("/comments", response_model=CommentOut)
+async def create_comment(
+    body: NewComment,
+    user: Users = Depends(get_detail_user),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = Comments(comment_text=body.text, created_at=datetime.now(timezone.utc), user_id=user.user_id, user_username=user.username, movie_id=body.movie_id)
+    db.add(stmt)
+    try:
+        await db.commit()
+        await db.refresh(stmt)
+        return stmt
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+@app.delete("/comments")
+async def delete_comment(
+    comment_id: int,
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = delete(Comments).where(Comments.id == comment_id, Comments.user_id == user_id)
+
+    try:
+        await db.execute(stmt)
+        await db.commit()
+        return {"Message": "Comment deleted"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"comment not found")
