@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState, useRef } from "react";
-
-const API_URL = "http://localhost:8000";
+import { API_URL } from "./config";
 
 export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     const [mode, setMode] = useState("signin");
@@ -57,12 +56,13 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 username,
                 email,
                 password,
-            });
+            }, { withCredentials: true });
 
-            onAuthSuccess?.(res.data);
+            await onAuthSuccess?.();
             onClose();
         } catch (err) {
             setError(
+                err.response?.data?.detail ||
                 err.response?.data?.message ||
                 "Something went wrong, try again."
             );
@@ -86,11 +86,10 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                     <button
                         type="button"
                         onClick={() => setMode("signin")}
-                        className={`flex-1 py-2 text-sm font-semibold transition cursor-pointer ${
-                            mode === "signin"
+                        className={`flex-1 py-2 text-sm font-semibold transition cursor-pointer ${mode === "signin"
                                 ? "bg-black text-white dark:bg-white dark:text-black"
                                 : "hover:bg-black/5 dark:hover:bg-white/10"
-                        }`}
+                            }`}
 
                     >
                         Sign In
@@ -98,11 +97,10 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                     <button
                         type="button"
                         onClick={() => setMode("signup")}
-                        className={`flex-1 py-2 text-sm font-semibold transition cursor-pointer ${
-                            mode === "signup"
+                        className={`flex-1 py-2 text-sm font-semibold transition cursor-pointer ${mode === "signup"
                                 ? "bg-black text-white dark:bg-white dark:text-black"
                                 : "hover:bg-black/5 dark:hover:bg-white/10"
-                        }`}
+                            }`}
                     >
                         Sign Up
                     </button>
@@ -153,7 +151,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                     {error && (
                         <p className="text-sm text-red-500">{error}</p>
                     )}
-                    
+
                     <button
                         type="submit"
                         disabled={loading}
@@ -162,8 +160,8 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                         {loading
                             ? "Wait..."
                             : mode === "signin"
-                            ? "Sign In"
-                            : "Register"}
+                                ? "Sign In"
+                                : "Register"}
                     </button>
                 </form>
             </div>

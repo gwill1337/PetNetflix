@@ -27,7 +27,6 @@ class NewMovieOut(BaseModel):
 
 class AddFavorite(BaseModel):
     movie_id: int
-    user_id: int
 
 class AddFavoriteOut(BaseModel):
     movie_id: int
@@ -51,6 +50,14 @@ class CreateUser(BaseModel):
 
 class CreateUserOut(BaseModel):
     username: str
+    email: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserOut(BaseModel):
+    username: str
+    user_id: int
     email: str
 
     model_config = ConfigDict(from_attributes=True)

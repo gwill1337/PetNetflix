@@ -4,6 +4,9 @@ import { useDebounce } from "./hooks/useDebounce";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthModal } from "./AuthModal";
+import { UserMenu } from "./UserMenu";
+import { useAuth } from "./hooks/useAuth";
+import { API_URL } from "./config";
 
 export function SetHeader() {
     const { theme, toggleTheme } = useTheme();
@@ -14,9 +17,12 @@ export function SetHeader() {
     const boxRef = useRef(null);
     const navigate = useNavigate();
 
+    const { user, isLoggedIn, loading: authLoading, logout, refetchUser } = useAuth();
+
+    const [retryRefreshToken, setRetryRefreshToken] = useState(false);
+
     const [authOpen, setAuthOpen] = useState(false);
 
-    const API_URL = "http://localhost:8000";
 
     useEffect(() => {
         if (!debouncedSearch.trim()) {
@@ -79,18 +85,29 @@ export function SetHeader() {
                 >
                     {theme === "dark" ? "☀ Light" : "🌙 Dark"}
                 </button>
-                <button
-                    onClick={() => setAuthOpen(true)}
-                    className='text-sm px-3 py-1 outline-0 font-semibold hover:bg-black/15 dark:hover:bg-white/15 transition rounded border border-black/20 dark:border-white/20 cursor-pointer h-9'
-                >
-                    Sign In
-                </button>
 
-                <AuthModal
-                    isOpen={authOpen}
-                    onClose={() => setAuthOpen(false)}
-                    onAuthSuccess={(user) => console.log("Успешный вход:", user)}
-                />
+                {!authLoading && isLoggedIn && (
+                    <div>
+                        <UserMenu username={user?.username} email={user?.email} onLogout={logout} />
+                    </div>
+                )}
+
+                {!authLoading && !isLoggedIn && (
+                    <div>
+                        <button
+                            onClick={() => setAuthOpen(true)}
+                            className='text-sm px-3 py-1 outline-0 font-semibold hover:bg-black/15 dark:hover:bg-white/15 transition rounded border border-black/20 dark:border-white/20 cursor-pointer h-9'
+                        >
+                            Sign In
+                        </button>
+
+                        <AuthModal
+                            isOpen={authOpen}
+                            onClose={() => setAuthOpen(false)}
+                            onAuthSuccess={refetchUser}
+                        />
+                    </div>
+                )}
 
                 {open && results.length > 0 && (
 

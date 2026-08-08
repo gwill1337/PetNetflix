@@ -5,12 +5,12 @@ import FavoriteButton from "./FavoriteButton";
 import { useDebounce } from './hooks/useDebounce';
 import { useTheme } from './hooks/useTheme';
 import { SetHeader } from "./Header";
-
-const API_URL = "http://localhost:8000";
+import { useAuth } from "./hooks/useAuth";
+import { API_URL } from "./config";
 
 export function MovieDetails() {
     const { id } = useParams();
-    const userId = 1;
+    const { userId, isLoggedIn, loading: authLoading } = useAuth();
 
     const [movie, setMovie] = useState(null);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -18,18 +18,27 @@ export function MovieDetails() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (authLoading) return;
+
         const controller = new AbortController();
 
         async function fetchData() {
             setLoading(true);
             try {
-                const [movieRes, favoritesRes] = await Promise.all([
-                    axios.get(`${API_URL}/movie/${id}`, { signal: controller.signal }),
-                    axios.get(`${API_URL}/favorites?user_id=${userId}`, { signal: controller.signal }),
-                ]);
-
-                setMovie(movieRes.data);
-                setIsFavorite(favoritesRes.data.includes(Number(id)));
+                if (!isLoggedIn) {
+                    const [movieRes, favoritesRes] = await Promise.all([
+                        axios.get(`${API_URL}/movie/${id}`, { signal: controller.signal }),
+                    ]);
+                    setMovie(movieRes.data);
+                    setIsFavorite(false);
+                } else {
+                    const [movieRes, favoritesRes] = await Promise.all([
+                        axios.get(`${API_URL}/movie/${id}`, { signal: controller.signal }),
+                        axios.get(`${API_URL}/favorites/${userId}`, { signal: controller.signal }),
+                    ]);
+                    setMovie(movieRes.data);
+                    setIsFavorite(favoritesRes.data.includes(Number(id)));
+                }
             } catch (err) {
                 if (!axios.isCancel(err)) {
                     setError(err.message);
@@ -42,7 +51,7 @@ export function MovieDetails() {
         fetchData();
 
         return () => controller.abort();
-    }, [id]);
+    }, [id, authLoading]);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p className="text-red-500">Error: {error}</p>;
@@ -50,6 +59,7 @@ export function MovieDetails() {
 
     return (
         <div className="w-full h-full bg-white dark:bg-black text-black dark:text-white px-6 py-5 flex items-start">
+            {/* <div className="fog-bg-red"/> */}
             {/* Movie details */}
             {movie.image && (
                 <div className="relative shrink-0 w-md aspect-2/3">

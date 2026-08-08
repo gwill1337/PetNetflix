@@ -4,11 +4,14 @@ import './index.css'
 import App from './App.jsx'
 import { ThemeProvider } from './ThemeProvider.jsx'
 import { MainRoutes } from './MainRoutes.jsx'
+import { AuthProvider } from './AuthProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <MainRoutes />
+      <AuthProvider>
+        <MainRoutes />
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
 )

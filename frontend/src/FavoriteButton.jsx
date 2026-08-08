@@ -1,10 +1,15 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import axios from 'axios';
+import { API_URL } from "./config";
 
 function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
     const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
     const [loading, setLoading] = useState(false);
-    const API_URL = "http://localhost:8000";
+
+    useEffect(() => {
+        setIsFavorite(initialIsFavorite);
+    }, [initialIsFavorite]);
+
 
     async function handleClick() {
         if (loading) return;
@@ -14,15 +19,14 @@ function FavoriteButton({ movieId, userId, initialIsFavorite = false }) {
         setLoading(true);
 
         const payload = {
-            user_id: userId,
             movie_id: movieId,
         };
 
         try {
             if (!isFavorite) {
-                await axios.post(`${API_URL}/favorite`, payload);
+                await axios.post(`${API_URL}/favorite/${userId}`, payload);
             } else
-                await axios.delete(`${API_URL}/favorite`, { data: payload });
+                await axios.delete(`${API_URL}/favorite/${userId}`, { data: payload });
         } catch (err) {
             setIsFavorite(!nextValue);
             console.error(err.response?.data?.message || err.message);
