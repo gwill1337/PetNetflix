@@ -9,8 +9,8 @@ from schemas import (
 )
 from db import (
     Movies,
+    get_db,
 )
-from main import get_db
 
 from .auth import get_current_admin
 

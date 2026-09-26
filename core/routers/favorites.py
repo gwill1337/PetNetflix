@@ -9,10 +9,9 @@ from schemas import (
 )
 
 from db import (
-    UsersFavorite
+    UsersFavorite,
+    get_db,
 )
-
-from main import get_db
 
 router = APIRouter()
 

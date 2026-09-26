@@ -15,8 +15,8 @@ from schemas import (
 from db import (
     Users,
     UserSessions,
+    get_db,
 )
-from main import get_db
 
 from security import (
     hash_password,

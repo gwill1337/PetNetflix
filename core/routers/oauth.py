@@ -7,9 +7,9 @@ from sqlalchemy import select
 from fastapi.responses import RedirectResponse
 from config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
-from db import UserSessions, Users
+from db import UserSessions, Users, get_db
 from security import create_jwt
-from main import get_db
+
 
 
 router = APIRouter()
