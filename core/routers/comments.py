@@ -17,7 +17,7 @@ from db import (
 
 from main import get_db
 
-from routers.auth import get_current_user, get_detail_user
+from auth import get_current_user, get_detail_user
 
 router = APIRouter()
 
