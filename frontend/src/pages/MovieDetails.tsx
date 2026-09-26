@@ -36,7 +36,7 @@ export function MovieDetails() {
                     return;
                 }
 
-                const favoritesRes = await axios.get(`${API_URL}/favorites/${userId}`, { signal: controller.signal });
+                const favoritesRes = await axios.get(`${API_URL}/favorites`, { signal: controller.signal });
                 setIsFavorite(favoritesRes.data.includes(Number(id)));
             } catch (err: unknown) {
                 if (!axios.isCancel(err)) {
