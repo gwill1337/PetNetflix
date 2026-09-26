@@ -11,3 +11,4 @@ wheels/
 core/.venv
 
 frontend_tsx_123/
+.env
