@@ -1,27 +1,8 @@
 from contextlib import asynccontextmanager
-from typing import List
-import bcrypt
-import jwt
-from uuid import uuid4
-from hashlib import sha256
-from datetime import datetime, timedelta, timezone
-from fastapi import FastAPI, Depends, HTTPException, Query, status, Cookie, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import DateTime, ForeignKey, Text, exists, select, delete, func
 from config import settings
 
-from schemas import (
-    NewMovie,
-    EditMovie,
-    AddFavorite,
-    CreateUser,
-    LoginUser,
-    UserOut,
-    NewComment,
-    CommentOut,
-)
 from starlette.middleware.sessions import SessionMiddleware
 from db import engine, SessionLocal
 
@@ -39,7 +20,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors,
     allow_headers=["*"],
     allow_methods=["*"],
     allow_credentials=True,
