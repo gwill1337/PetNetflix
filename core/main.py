@@ -12,8 +12,7 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
-# app = FastAPI(lifespan=lifespan)
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,12 +23,6 @@ app.add_middleware(
 )
 
 app.add_middleware(SessionMiddleware, secret_key=settings.jwt_key)
-
-
-@app.get("/get")
-async def get_something():
-    return {"Message": "Hello"}
-
 
 from routers import ( # noqa: F401 E402
     auth,
