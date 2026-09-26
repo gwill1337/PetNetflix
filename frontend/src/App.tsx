@@ -32,7 +32,7 @@ function App() {
         setMovies(moviesRes.data);
 
         if (isLoggedIn && userId !== null) {
-          const favoritesRes = await axios.get<number[]>(`${API_URL}/favorites/${userId}`, {
+          const favoritesRes = await axios.get<number[]>(`${API_URL}/favorites`, {
             signal: controller.signal,
           });
           setFavoriteIds(new Set(favoritesRes.data));
