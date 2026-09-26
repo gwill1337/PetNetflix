@@ -14,3 +14,5 @@ frontend_tsx_123/
 .env
 
 scripts/
+core/make_admin.py
+make_admin.py
