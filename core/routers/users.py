@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import  select
 
 from schemas import (
     CreateUser,
@@ -9,19 +8,10 @@ from schemas import (
 
 from db import (
     Users,
-    
 )
 from main import get_db
 
 router = APIRouter()
-
-
-
-@router.get("/users")
-async def get_users_test(db: AsyncSession = Depends(get_db)):
-    q = select(Users)
-    res = await db.execute(q)
-    return res.scalars().all()
 
 @router.post("/user")
 async def create_user(body: CreateUser, db: AsyncSession = Depends(get_db)) -> ResponseOut:

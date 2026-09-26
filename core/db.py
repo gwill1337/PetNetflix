@@ -7,9 +7,6 @@ from config import settings
 
 engine = create_async_engine(
     settings.database_url,
-    connect_args={
-            "statement_cache_size": 0,
-        },
     )
 SessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
@@ -37,6 +34,7 @@ class Users(Base):
     password_hash: Mapped[str] = mapped_column(nullable=True)
     oauth_provider: Mapped[str] = mapped_column(nullable=True)
     oauth_sub: Mapped[str] = mapped_column(nullable=True, unique=True)
+    is_admin: Mapped[bool] = mapped_column(default=False)
 
 class UsersFavorite(Base):
     __tablename__ = "usersfavorite"

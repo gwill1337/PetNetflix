@@ -13,12 +13,11 @@ from schemas import (
 from db import (
     Comments,
     Users,
-    
 )
 
 from main import get_db
 
-from routers.auth import get_detail_user
+from routers.auth import get_current_user, get_detail_user
 
 router = APIRouter()
 
@@ -54,7 +53,7 @@ async def create_comment(
 @router.delete("/comments")
 async def delete_comment(
     comment_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ResponseOut:
     stmt = delete(Comments).where(Comments.id == comment_id, Comments.user_id == user_id)

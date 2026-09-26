@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
 import { memo } from "react";
 import type { movieCard } from "../types/movie";
+import { useAuth } from "../hooks/useAuth";
 
 
 
-function MovieCard({ image, movieId, userId, rating, isFavorite }: movieCard) {
+function MovieCard({ image, movieId, rating, isFavorite }: movieCard) {
+    const { isLoggedIn } = useAuth();
     return (
         <div className="relative w-full  aspect-2/3 rounded-2xl overflow-hidden shadow-lg">
             <Link to={`movie/${movieId}`} className="block w-full h-full">
@@ -18,8 +20,8 @@ function MovieCard({ image, movieId, userId, rating, isFavorite }: movieCard) {
                 IMDb: {rating}
             </div>
             <div className="absolute top-2 right-2">
-                {userId !== null && (
-                    <FavoriteButton movieId={movieId} userId={userId} initialIsFavorite={isFavorite} />
+                {isLoggedIn && (
+                    <FavoriteButton movieId={movieId} initialIsFavorite={isFavorite} />
                 )}
             </div>
         </div>

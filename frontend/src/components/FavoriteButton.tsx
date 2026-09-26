@@ -4,11 +4,10 @@ import { API_URL } from "../config/config";
 
 interface FavoriteButtonType {
     movieId: number;
-    userId: number;
     initialIsFavorite: boolean;
 }
 
-function FavoriteButton({ movieId, userId, initialIsFavorite = false }: FavoriteButtonType) {
+function FavoriteButton({ movieId, initialIsFavorite = false }: FavoriteButtonType) {
     const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
     const [loading, setLoading] = useState(false);
 
@@ -30,9 +29,9 @@ function FavoriteButton({ movieId, userId, initialIsFavorite = false }: Favorite
 
         try {
             if (!isFavorite) {
-                await axios.post(`${API_URL}/favorite/${userId}`, payload);
+                await axios.post(`${API_URL}/favorite`, payload, { withCredentials: true});
             } else
-                await axios.delete(`${API_URL}/favorite/${userId}`, { data: payload });
+                await axios.delete(`${API_URL}/favorite`, { data: payload, withCredentials: true });
         } catch (err) {
             setIsFavorite(!nextValue);
             const message = isAxiosError(err) ? err.response?.data?.message || err.message : undefined;

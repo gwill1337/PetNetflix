@@ -12,7 +12,16 @@ from db import (
 )
 from main import get_db
 
-router = APIRouter()
+from auth import get_current_admin
+
+router = APIRouter(
+    tags=["user"]
+)
+
+admin_router = APIRouter(
+    tags=["admin"],
+    dependencies=[Depends(get_current_admin)]
+)
 
 @router.get("/movies")
 async def get_movies(
@@ -42,7 +51,7 @@ async def search_for_movie(
     res = await db.execute(query)
     return res.scalars().all()
 
-@router.post("/movie")
+@admin_router.post("/movie")
 async def add_movie(body: NewMovie, db: AsyncSession = Depends(get_db)) -> ResponseOut:
     stmt = Movies(name=body.name, image=body.image, rating=body.rating, year=body.year, title=body.title, description=body.description)
     db.add(stmt)
@@ -53,7 +62,7 @@ async def add_movie(body: NewMovie, db: AsyncSession = Depends(get_db)) -> Respo
         raise HTTPException(status_code=500, detail=f"Server Error: {e}")
     return ResponseOut(message="Movie added to database")
 
-@router.put("/movie/{movie_id}")
+@admin_router.put("/movie/{movie_id}")
 async def edit_movie(movie_id: int, body: EditMovie, db: AsyncSession = Depends(get_db)) -> ResponseOut:
     movie = await db.get(Movies, movie_id)
 

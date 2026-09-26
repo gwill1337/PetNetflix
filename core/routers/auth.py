@@ -15,7 +15,6 @@ from schemas import (
 from db import (
     Users,
     UserSessions,
-    
 )
 from main import get_db
 
@@ -64,7 +63,6 @@ async def login(
     resp.set_cookie("token", token, samesite="lax", httponly=True)
     resp.set_cookie("refresh_token", refresh_token, samesite="lax", httponly=True)
     return ResponseOut(message="Loged in successfully")
-    
 
 async def get_current_user(token: str = Cookie(None)):
     if not token:
@@ -90,6 +88,15 @@ async def get_detail_user(
     except Exception:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return res.scalars().first()
+
+async def get_current_admin(
+    user_id: int = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await db.get(Users, user_id)
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return user_id
 
 @router.post("/auth/register")
 async def register(

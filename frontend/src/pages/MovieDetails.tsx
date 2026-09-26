@@ -69,11 +69,10 @@ export function MovieDetails() {
                             alt={movie.title || movie.name}
                             className="w-full h-full object-cover rounded-2xl shadow-lg"
                         />
-                        {userId !== null && (
+                        {isLoggedIn && (
                             <div className="absolute top-1 right-2 z-10">
                                 <FavoriteButton
                                     movieId={movie.movie_id}
-                                    userId={userId}
                                     initialIsFavorite={isFavorite}
                                 />
                             </div>
