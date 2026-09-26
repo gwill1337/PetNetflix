@@ -39,9 +39,9 @@ from routers import ( # noqa: F401 E402
     oauth,
 )
 
-app.include_router(auth.router)
-app.include_router(comments.router)
-app.include_router(favorites.router)
-app.include_router(movies.router)
-app.include_router(movies.admin_router)
-app.include_router(oauth.router)
+app.include_router(auth.router, prefix="/api")
+app.include_router(comments.router, prefix="/api")
+app.include_router(favorites.router, prefix="/api")
+app.include_router(movies.router, prefix="/api")
+app.include_router(movies.admin_router, prefix="/api")
+app.include_router(oauth.router, prefix="/api")

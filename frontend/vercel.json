@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/:path*", "destination": "https://petnetflix.onrender.com/:path*" },
+    { "source": "/api/:path*", "destination": "https://petnetflix.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
