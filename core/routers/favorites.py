@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
-from auth import get_current_user
+from .auth import get_current_user
 from schemas import (
     AddFavorite,
     ResponseOut,

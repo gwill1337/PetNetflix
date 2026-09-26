@@ -12,7 +12,7 @@ from db import (
 )
 from main import get_db
 
-from auth import get_current_admin
+from .auth import get_current_admin
 
 router = APIRouter(
     tags=["user"]
