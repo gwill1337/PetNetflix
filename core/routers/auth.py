@@ -86,8 +86,11 @@ async def get_detail_user(
     try:
         res = await db.execute(query)
     except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error. Try again")
+    user = res.scalars().first()
+    if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return res.scalars().first()
+    return user
 
 async def get_current_admin(
     user_id: int = Depends(get_current_user),

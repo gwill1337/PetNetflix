@@ -60,7 +60,7 @@ function App() {
     <div className='min-h-screen w-full bg-white dark:bg-black text-black dark:text-white px-6 py-5'>
       <div className='relative'>
         <main className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6 justify-items-center max-w-[1800px] mx-auto'>
-          {loading && <p>Loading...</p>}
+          {loading && <p>Loading, please wait. This may take 30-90 seconds.</p>}
           {error && <p className='text-red-500'>Error: {error}</p>}
           {!loading && !error && movies.map((movie) => (
             <MovieCard
