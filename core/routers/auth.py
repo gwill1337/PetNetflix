@@ -60,8 +60,8 @@ async def login(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Error to add new session to db. {e}")
 
-    resp.set_cookie("token", token, samesite="lax", httponly=True)
-    resp.set_cookie("refresh_token", refresh_token, samesite="lax", httponly=True)
+    resp.set_cookie("token", token, samesite="lax", httponly=True, secure=True)
+    resp.set_cookie("refresh_token", refresh_token, samesite="lax", httponly=True, secure=True)
     return ResponseOut(message="Loged in successfully")
 
 async def get_current_user(token: str = Cookie(None)):
@@ -161,8 +161,8 @@ async def refresh_token(
             new_refresh_token = await create_jwt(refresh_payload, 60*60*24*7)
             new_refresh_token_hash = sha256(new_refresh_token.encode("utf-8")).hexdigest()
             
-            resp.set_cookie("token", new_token, samesite="lax", httponly=True)
-            resp.set_cookie("refresh_token", new_refresh_token, samesite="lax", httponly=True)
+            resp.set_cookie("token", new_token, samesite="lax", httponly=True, secure=True)
+            resp.set_cookie("refresh_token", new_refresh_token, samesite="lax", httponly=True, secure=True)
             
             session.refresh_token_hash = new_refresh_token_hash
             try:

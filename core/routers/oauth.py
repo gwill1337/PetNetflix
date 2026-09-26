@@ -86,6 +86,6 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
     db.add(new_session)
     await db.commit()
 
-    resp.set_cookie("token", access_token, samesite="lax", httponly=True)
-    resp.set_cookie("refresh_token", refresh_token, samesite="lax", httponly=True)
+    resp.set_cookie("token", access_token, samesite="lax", httponly=True, secure=True)
+    resp.set_cookie("refresh_token", refresh_token, samesite="lax", httponly=True, secure=True)
     return resp
