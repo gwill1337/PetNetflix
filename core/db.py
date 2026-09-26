@@ -5,7 +5,12 @@ from sqlalchemy import DateTime, ForeignKey, Text, func
 from config import settings
 
 
-engine = create_async_engine(settings.database_url)
+engine = create_async_engine(
+    settings.database_url,
+    connect_args={
+            "statement_cache_size": 0,
+        },
+    )
 SessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):
