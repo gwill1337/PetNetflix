@@ -9,7 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 function MovieCard({ image, movieId, rating, isFavorite }: movieCard) {
     const { isLoggedIn } = useAuth();
     return (
-        <div className="relative w-full  aspect-2/3 rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative w-full  aspect-2/3 rounded-2xl overflow-hidden transition duration-300 hover:scale-[1.03] shadow-lg">
             <Link to={`movie/${movieId}`} className="block w-full h-full">
                 <img src={image}
                     alt="Movie Poster"
